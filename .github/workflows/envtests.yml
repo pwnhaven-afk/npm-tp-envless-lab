@@ -1,0 +1,28 @@
+name: envtests
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  case:
+    runs-on: ubuntu-latest
+    environment: caseenv
+    steps:
+      - run: |
+          echo "CASE_JOB_RAN ref=$GITHUB_REF"
+          RESP=$(curl -sS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:registry.npmjs.org")
+          echo "$RESP" | jq -r .value | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null | jq '{ref,environment}'
+  prefix:
+    runs-on: ubuntu-latest
+    environment: prefixenv
+    steps:
+      - run: |
+          echo "PREFIX_JOB_RAN ref=$GITHUB_REF"
+          RESP=$(curl -sS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:registry.npmjs.org")
+          echo "$RESP" | jq -r .value | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null | jq '{ref,environment}'
+  ctl:
+    runs-on: ubuntu-latest
+    environment: ctlenv
+    steps:
+      - run: echo "CTL_JOB_RAN ref=$GITHUB_REF"
