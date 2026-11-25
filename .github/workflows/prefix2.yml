@@ -1,0 +1,12 @@
+name: prefix2
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  prefix2:
+    runs-on: ubuntu-latest
+    environment: prefixenv2
+    steps:
+      - run: echo "PREFIX2_RAN ref=$GITHUB_REF"
