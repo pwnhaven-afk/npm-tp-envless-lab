@@ -1,0 +1,19 @@
+name: tagenv-claims
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  claim:
+    runs-on: ubuntu-latest
+    environment: tagenv
+    steps:
+      - name: Show ref + mint token
+        run: |
+          echo "GITHUB_REF=$GITHUB_REF REF_NAME=$GITHUB_REF_NAME"
+          RESP=$(curl -sS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=npm:registry.npmjs.org")
+          TOKEN=$(echo "$RESP" | jq -r .value)
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')
+          while [ $(( ${#PAYLOAD} % 4 )) -ne 0 ]; do PAYLOAD="${PAYLOAD}="; done
+          echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '{ref,ref_type,event_name,environment,sub}'
